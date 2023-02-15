@@ -1,2 +1,2 @@
-### Home Assistant configuration files
+# Home Assistant configuration files
 Configs for my Home Assistant instance
