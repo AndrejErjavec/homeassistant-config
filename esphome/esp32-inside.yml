@@ -13,7 +13,7 @@ esp32:
     type: arduino
 
 esphome:
-  name: $devicename
+  name: ${devicename}
   # on_boot documentation and priorities: https://esphome.io/components/esphome.html#on-boot
   on_boot:
     - priority: -100
@@ -72,8 +72,8 @@ wifi:
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "Esphome-Web-F1C884"
-    password: "SioVN9kp2gvp"
+    ssid: !secret ap_ssid
+    password: !secret ap_password
 
 captive_portal:
     
