@@ -89,10 +89,10 @@ deep_sleep:
   sleep_duration: $sleep_duration
 
 mqtt:
-  broker: 192.168.64.18
+  broker: !secret mqtt_broker
   port: 1883
-  username: mqtt
-  password: mosquit69
+  username: !secret mqtt_username
+  password: !secret mqtt_password
   birth_message:
   will_message:
   on_message:
