@@ -2,6 +2,10 @@
 
 # https://community.home-assistant.io/t/solar-powered-self-watering-plant-no-plumbing-no-power-wip/464263/14
 
+# TODO
+# [] Implement deep sleep prevent switch instead of mqtt
+# [] Battery level reporting
+
 substitutions:
   devicename: esp32-inside
   max_run_duration: 60s
