@@ -12,7 +12,7 @@ esphome:
     - priority: -100
       then: # At this priority, pretty much everything should already be initialized.
         - logger.log: "Waiting to connect to api"
-        - delay: 5s
+        - delay: 2s
         - logger.log: "Starting sensor updates..."
         - repeat:
             count: 5
@@ -22,7 +22,7 @@ esphome:
 
               # Request sensor updates
               - component.update: dht_outside
-              - delay: 2000ms # DHT11 is a really slow sensor
+              - delay: 500ms # DHT11 is a really slow sensor
               - component.update: bmp_outside
               - delay: 100ms
   
