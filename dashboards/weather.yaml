@@ -1,0 +1,169 @@
+kiosk_mode:
+  admin_settings:
+    hide_header: false
+  non_admin_settings:
+    hide_header: true
+    hide_sidebar: true
+    ignore_entity_settings: true
+
+views:
+  - theme: Backend-selected
+    title: Home
+    type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr 1fr
+      grid-template-rows: auto
+      grid-template-areas: |
+        "header header"
+        "col1 col2"
+    badges: []
+    cards:
+      - type: iframe
+        url: https://vreme.arso.gov.si/widget/?&loc=Idrija
+        card_mod:
+          style: |
+            ha-card {
+              height: 185px
+            }
+        view_layout:
+          grid-area: header
+      - type: vertical-stack
+        cards:
+          - square: false
+            columns: 2
+            type: grid
+            cards:
+              - type: custom:mini-graph-card
+                name: Temperatura znotraj
+                entities:
+                  - sensor.inside_temperature_bmp
+                decimals: 1
+                line_color: '#ff4e4e'
+                font_size: 130
+                show:
+                  icon: false
+                card_mod:
+                  style: |
+                    .name > span {
+                      opacity: 0.85 !important;
+                      color: #fff;
+                    }
+              - type: custom:mini-graph-card
+                name: Vlažnost znotraj
+                entities:
+                  - sensor.inside_humidity_dht
+                line_color: '#5ba4ff'
+                font_size: 130
+                show:
+                  icon: false
+                card_mod:
+                  style: |
+                    .name > span {
+                      opacity: 0.85 !important;
+                      color: #fff;
+                    }
+          - type: custom:sun-card
+            darkMode: true
+            language: sl
+            card_mod:
+              style: |
+                .sun-card-header span {
+                  padding-bottom: 0px !important;
+                }
+                .sun-card-footer span {
+                  padding-bottom: 0px !important;
+                }
+                .sun-card-footer-row {
+                  padding-top: 0px !important;
+                }
+        view_layout:
+          grid-area: col1
+      - type: vertical-stack
+        cards:
+          - type: vertical-stack
+            cards:
+              - square: false
+                columns: 2
+                type: grid
+                cards:
+                  - type: custom:mini-graph-card
+                    name: Temperatura zunaj
+                    entities:
+                      - sensor.outside_temperature_bmp
+                    decimals: 1
+                    line_color: '#ff4e4e'
+                    font_size: 130
+                    show:
+                      icon: false
+                    card_mod:
+                      style: |
+                        .name > span {
+                          opacity: 0.85 !important;
+                          color: #fff;
+                        }
+                  - type: custom:mini-graph-card
+                    name: Vlažnost zunaj
+                    entities:
+                      - sensor.outside_humidity_dht
+                    line_color: '#5ba4ff'
+                    font_size: 130
+                    show:
+                      icon: false
+                    card_mod:
+                      style: |
+                        .name > span {
+                          opacity: 0.85 !important;
+                          color: #fff;
+                        }
+                  - type: custom:mini-graph-card
+                    name: Zračni tlak
+                    entities:
+                      - sensor.outside_pressure_bmp
+                    line_color: '#00fc89'
+                    font_size: 130
+                    show:
+                      icon: false
+                    card_mod:
+                      style: |
+                        .name > span {
+                          opacity: 0.85 !important;
+                          color: #fff;
+                        }
+                  - type: custom:mini-graph-card
+                    name: Veter
+                    entities:
+                      - sensor.openweathermap_wind_speed
+                    decimals: 1
+                    line_color: '#3dfefc'
+                    font_size: 130
+                    show:
+                      icon: false
+                    card_mod:
+                      style: |
+                        .name > span {
+                          opacity: 0.85 !important;
+                          color: #fff;
+                        }
+              - type: horizontal-stack
+                cards:
+                  - type: custom:mushroom-entity-card
+                    entity: sensor.speedtest_download
+                    name: download
+                    icon: mdi:arrow-down-bold-circle
+                    icon_color: cyan
+                    card_mod:
+                      style: |
+                        span .secondary {
+                          font-size: var(--card-primary-font-size) !important
+                        }
+                  - type: custom:mushroom-entity-card
+                    entity: sensor.speedtest_upload
+                    name: upload
+                    icon: mdi:arrow-up-bold-circle
+                    icon_color: pink
+                  - type: custom:mushroom-entity-card
+                    entity: sensor.speedtest_ping
+                    name: ping
+                    icon_color: amber
+        view_layout:
+          grid-area: col2

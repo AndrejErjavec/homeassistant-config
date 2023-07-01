@@ -2,12 +2,8 @@
 
 # https://community.home-assistant.io/t/solar-powered-self-watering-plant-no-plumbing-no-power-wip/464263/14
 
-# TODO
-# [] Implement deep sleep prevent switch instead of mqtt
-# [] Battery level reporting
-
 substitutions:
-  devicename: esp32-inside
+  devicename: esp-weather-inside
   max_run_duration: 60s
   sleep_duration: 60s
 
@@ -85,7 +81,7 @@ wifi:
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "Esphome-Web-F1C884"
+    ssid: "esp-weather-inside"
     password: "SioVN9kp2gvp"
 
 captive_portal:
@@ -170,10 +166,10 @@ binary_sensor:
 
   # Import deep sleep switch from HA
   - platform: homeassistant
-    name: "OTA mode ON"
+    name: "esp weather inside OTA mode state"
     internal: false
-    id: esp32_inside_ota_mode_esphome
-    entity_id: input_boolean.esp32_inside_ota_mode
+    id: esp_weather_inside_ota_state
+    entity_id: input_boolean.esp_weather_inside_ota_mode
     # detect turn off ota while running
     on_state:
       then:
@@ -201,10 +197,10 @@ script:
       - logger.log: "Checking for OTA mode"
       - logger.log:
           format: "State of binary sensor is %d"
-          args: ['id(esp32_inside_ota_mode_esphome).state']
+          args: ['id(esp_weather_inside_ota_state).state']
       - if:
           condition:
-            - binary_sensor.is_on: esp32_inside_ota_mode_esphome
+            - binary_sensor.is_on: esp_weather_inside_ota_state
           then:
             - logger.log: "OTA mode enabled for esp-32-inside; preventing deep sleep"
             - deep_sleep.prevent: deep_sleep_1
