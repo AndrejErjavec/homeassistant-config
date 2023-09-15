@@ -1,14 +1,19 @@
 kiosk_mode:
   admin_settings:
-    hide_header: false
-  non_admin_settings:
-    hide_header: true
-    hide_sidebar: true
+    kiosk: false
     ignore_entity_settings: true
-
+  non_admin_settings:
+    ignore_entity_settings: false
+  entity_settings:
+    - entity:
+        input_boolean.kiosk_mode: 'on'
+      kiosk: true
+    - entity:
+        input_boolean.kiosk_mode: 'off'
+      kiosk: false
 views:
   - theme: Backend-selected
-    title: Home
+    title: View1
     type: custom:grid-layout
     layout:
       grid-template-columns: 1fr 1fr
@@ -16,6 +21,7 @@ views:
       grid-template-areas: |
         "header header"
         "col1 col2"
+    icon: mdi:tablet
     badges: []
     cards:
       - type: iframe
@@ -36,7 +42,7 @@ views:
               - type: custom:mini-graph-card
                 name: Temperatura znotraj
                 entities:
-                  - sensor.inside_temperature_bmp
+                  - sensor.outside_temperature_bmp
                 decimals: 1
                 line_color: '#ff4e4e'
                 font_size: 130
@@ -51,7 +57,7 @@ views:
               - type: custom:mini-graph-card
                 name: Vlažnost znotraj
                 entities:
-                  - sensor.inside_humidity_dht
+                  - sensor.outside_humidity_dht
                 line_color: '#5ba4ff'
                 font_size: 130
                 show:
@@ -89,7 +95,7 @@ views:
                   - type: custom:mini-graph-card
                     name: Temperatura zunaj
                     entities:
-                      - sensor.outside_temperature_bmp
+                      - sensor.openweathermap_temperature
                     decimals: 1
                     line_color: '#ff4e4e'
                     font_size: 130
@@ -104,7 +110,7 @@ views:
                   - type: custom:mini-graph-card
                     name: Vlažnost zunaj
                     entities:
-                      - sensor.outside_humidity_dht
+                      - sensor.openweathermap_humidity
                     line_color: '#5ba4ff'
                     font_size: 130
                     show:
@@ -118,7 +124,7 @@ views:
                   - type: custom:mini-graph-card
                     name: Zračni tlak
                     entities:
-                      - sensor.outside_pressure_bmp
+                      - sensor.openweathermap_pressure
                     line_color: '#00fc89'
                     font_size: 130
                     show:
@@ -165,5 +171,140 @@ views:
                     entity: sensor.speedtest_ping
                     name: ping
                     icon_color: amber
+                  - type: custom:mushroom-chips-card
+                    chips:
+                      - type: entity
+                        entity: input_boolean.kiosk_mode
+                        tap_action:
+                          action: toggle
+                        content_info: none
+                        use_entity_picture: false
+                    card_mod:
+                      style: |
+                        #root > * {
+                          flex: none !important
+                        }
         view_layout:
           grid-area: col2
+  - title: View2
+    path: view2
+    icon: mdi:laptop
+    subview: false
+    theme: Backend-selected
+    type: custom:grid-layout
+    layout:
+      grid-template-columns: 1fr 1fr 1fr
+      grid-template-rows: auto
+      grid-template-areas: |
+        "col1 col2 col3"
+    badges: []
+    cards:
+      - square: false
+        columns: 1
+        type: grid
+        cards:
+          - type: custom:simple-clock-card
+            card_mod:
+              style: |
+                ha-card {
+                  background-color: #0000 !important;
+                  border: none !important;
+                }
+          - type: custom:clock-weather-card
+            entity: weather.openweathermap
+            sun_entity: sun.sun
+            weather_icon_type: line
+            animated_icon: true
+            forecast_days: 5
+            locale: en-US
+            time_format: 24
+            hide_today_section: false
+            hide_forecast_section: false
+            hide_clock: false
+            hide_date: false
+          - type: horizontal-stack
+            cards:
+              - type: custom:mini-graph-card
+                name: Temperatura znotraj
+                entities:
+                  - sensor.outside_temperature_bmp
+                decimals: 1
+                line_color: '#ff4e4e'
+                show:
+                  icon: false
+              - type: custom:mini-graph-card
+                name: Vlažnost znotraj
+                entities:
+                  - sensor.outside_humidity_dht
+                line_color: '#5ba4ff'
+                show:
+                  icon: false
+        view_layout:
+          grid-area: col1
+      - square: false
+        columns: 1
+        type: grid
+        cards:
+          - type: iframe
+            url: >-
+              https://embed.windy.com/embed2.html?lat=45.767&lon=14.086&detailLat=45.767&detailLon=14.086&width=650&height=450&zoom=9&level=surface&overlay=clouds&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1
+            aspect_ratio: 100%
+          - type: custom:weather-card
+            name: danes
+            entity: weather.openweathermap_hourly
+            number_of_forecasts: '5'
+            details: false
+            current: false
+            hourly_forecast: true
+        view_layout:
+          grid-area: col2
+      - square: false
+        columns: 1
+        type: grid
+        cards:
+          - type: custom:sun-card
+            darkMode: true
+            language: sl
+          - square: false
+            columns: 2
+            type: grid
+            cards:
+              - type: custom:mini-graph-card
+                name: Temperatura
+                entities:
+                  - sensor.openweathermap_temperature
+                line_color: '#ff4e4e'
+                decimals: 1
+                show:
+                  icon: false
+              - type: custom:mini-graph-card
+                name: Vlažnost
+                entities:
+                  - sensor.openweathermap_humidity
+                line_color: '#5ba4ff'
+                show:
+                  icon: false
+              - type: custom:mini-graph-card
+                name: Zračni tlak
+                entities:
+                  - sensor.openweathermap_pressure
+                line_color: '#3dfefc'
+                show:
+                  icon: false
+              - type: custom:mini-graph-card
+                name: Veter
+                entities:
+                  - sensor.openweathermap_wind_speed
+                line_color: lightblue
+                show:
+                  icon: false
+              - type: custom:mushroom-chips-card
+                chips:
+                  - type: entity
+                    entity: input_boolean.kiosk_mode
+                    tap_action:
+                      action: toggle
+                    content_info: none
+                    use_entity_picture: false
+        view_layout:
+          grid-area: col3
