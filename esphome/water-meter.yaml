@@ -1,5 +1,5 @@
 esphome:
-  name: "esp-water-meter"
+  name: "water-meter"
 
 esp8266:
   board: esp01_1m

@@ -3,7 +3,7 @@
 # https://community.home-assistant.io/t/solar-powered-self-watering-plant-no-plumbing-no-power-wip/464263/14
 
 substitutions:
-  devicename: esp-weather-inside
+  devicename: outside
   max_run_duration: 60s
   sleep_duration: 60s
 
