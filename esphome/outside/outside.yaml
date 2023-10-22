@@ -1,7 +1,3 @@
-# Huge thanks to user Mahko_Mahko on Home Assistant Community for providing his configuration example. I included his practices in my configuration to make it work.
-
-# https://community.home-assistant.io/t/solar-powered-self-watering-plant-no-plumbing-no-power-wip/464263/14
-
 substitutions:
   devicename: outside
   max_run_duration: 60s
@@ -29,9 +25,9 @@ esphome:
               #Then the ESP goes back to sleep when they're done (unless told to stay awake)
 
               # Request sensor updates
-              - component.update: dht_inside
+              - component.update: dht_outside
               - delay: 500ms # DHT11 is a really slow sensor
-              - component.update: bmp_inside
+              - component.update: bmp_outside
               - delay: 100ms
 
   on_shutdown:
@@ -81,7 +77,7 @@ wifi:
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "esp-weather-inside"
+    ssid: "esp-outside"
     password: "SioVN9kp2gvp"
 
 captive_portal:
@@ -105,12 +101,12 @@ deep_sleep:
 #  birth_message:
 #  will_message:
 #  on_message:
-#    - topic: esp32-inside/ota_mode
+#    - topic: esp32-outside/ota_mode
 #      payload: 'ON'
 #      then:
 #        - deep_sleep.prevent: deep_sleep_1
 #        - logger.log: "OTA mode enabled - deep sleep mode disabled"
-#    - topic: esp32-inside/sleep_mode
+#    - topic: esp32-outside/sleep_mode
 #      payload: 'ON'
 #      then:
 #        - deep_sleep.enter: deep_sleep_1
@@ -120,24 +116,24 @@ binary_sensor:
   # Data update sensors. Implemented as barrier. Huge thanks to user Mahko_Mahko on Home Assistant Community for providing his configuration example.
   # https://community.home-assistant.io/t/solar-powered-self-watering-plant-no-plumbing-no-power-wip/464263/14
 
-  # Inside temperature DHT
+  # outside temperature DHT
   - platform: template
     name: Temperature DHT updated
     id: temperature_dht_received
     internal: True 
     # Internal components will not be exposed to the frontend (like Home Assistant). 
     # Only specifying an id without a name will implicitly set this to true.
-  # Inside humidity DHT
+  # outside humidity DHT
   - platform: template
     name: Humidity DHT updated
     id: humidity_dht_received
     internal: True 
-  # Inside temperature BMP
+  # outside temperature BMP
   - platform: template
     name: Temperature BMP updated
     id: temperature_bmp_received
     internal: True
-  # Inside pressure BMP
+  # outside pressure BMP
   - platform: template
     name: Pressure BMP updated
     id: pressure_bmp_received
@@ -159,86 +155,67 @@ binary_sensor:
     # Would this work with on_state as well?
       then:
         - delay: 100ms
-        - script.execute: check_ota_mode
+        - script.execute: sleep_if_allowed
 #        - deep_sleep.enter: 
 #            id: deep_sleep_1
 #        - script.execute: check_sensors_received
 
   # Import deep sleep switch from HA
   - platform: homeassistant
-    name: "esp weather inside OTA mode state"
+    name: "outside OTA mode"
     internal: false
-    id: esp_weather_inside_ota_state
-    entity_id: input_boolean.esp_weather_inside_ota_mode
+    id: outside_ota_mode
+    entity_id: input_boolean.outside_ota_mode
     # detect turn off ota while running
     on_state:
       then:
-        - script.execute: check_ota_mode
-
-#    on_state:
-#      then:
-#        if:
-#          condition: 
-#            lambda: return x;
-#          # OTA mode == true
-#          then:
-#            - logger.log: "OTA mode enabled for esp-32-inside"
-#            - deep_sleep.prevent: deep_sleep_1
-#          # OTA mode == false
-#          else:
-#            - logger.log: "OTA mode disabled for esp-32-inside"
-#            - deep_sleep.allow: deep_sleep_1
-#            - delay: 100ms
-#            - deep_sleep.enter: deep_sleep_1
+        - script.execute: sleep_if_allowed
 
 script:
-  - id: check_ota_mode
+  - id: sleep_if_allowed
     then:
-      - logger.log: "Checking for OTA mode"
-      - logger.log:
-          format: "State of binary sensor is %d"
-          args: ['id(esp_weather_inside_ota_state).state']
       - if:
           condition:
-            - binary_sensor.is_on: esp_weather_inside_ota_state
+            - binary_sensor.is_on: all_updates_received
           then:
-            - logger.log: "OTA mode enabled for esp-32-inside; preventing deep sleep"
-            - deep_sleep.prevent: deep_sleep_1
+            - if:
+                condition:
+                  - binary_sensor.is_on: outside_ota_mode
+                then:
+                  - logger.log: "OTA mode enabled; preventing deep sleep"
+                  - deep_sleep.prevent: deep_sleep_1
+                else:
+                  - logger.log: "OTA mode is disabled; entering deep sleep"
+                  - deep_sleep.allow: deep_sleep_1
+                  - deep_sleep.enter: deep_sleep_1
           else:
-            - logger.log: "OTA mode is disabled; entering deep sleep"
-            # fixed Association refused error
-            # https://github.com/espressif/arduino-esp32/pull/6359
-            # just disconnect wifi before entering deep sleep
-            - lambda: |-
-                WiFi.disconnect(true);
-            - deep_sleep.allow: deep_sleep_1
-            - deep_sleep.enter: deep_sleep_1
+            - logger.log: "Not all sensors updates received yet. Retrying..."
 
 
 sensor:
-  # Uptime sensor
-#  - platform: uptime
-#    id: uptime_seconds
-#    name: Uptime sensor
-#    update_interval: 1s
-#    accuracy_decimals: 1
-#    unit_of_measurement: s
+  - platform: uptime
+    id: outside_uptime
+    name: outside_uptime
+    update_interval: 1s
+    accuracy_decimals: 1
+    unit_of_measurement: s
+    internal: False
 
 # DHT11 - temperature, humidity
   - platform: dht
     model: DHT11
     pin: 15
-    id: dht_inside
+    id: dht_outside
     update_interval: never
     temperature:
-      name: "Inside temperature DHT"
+      name: "outside temperature DHT"
       on_value:
         then:
           - binary_sensor.template.publish:
               id: temperature_dht_received
               state: ON
     humidity:
-      name: "Inside humidity DHT"
+      name: "outside humidity DHT"
       on_value:
         then:
           - binary_sensor.template.publish:
@@ -248,11 +225,11 @@ sensor:
   # BMP280 - temperature, pressure
   - platform: bmp280
     address: 0x76
-    id: bmp_inside
+    id: bmp_outside
     update_interval: never
     temperature:
-      name: "Inside temperature BMP"
-      id: inside_termperature_bmp
+      name: "outside temperature BMP"
+      id: outside_termperature_bmp
       oversampling: 16x
       filters:
         - offset: -1.5
@@ -262,7 +239,7 @@ sensor:
               id: temperature_bmp_received
               state: ON
     pressure:
-      name: "Inside pressure BMP"
+      name: "outside pressure BMP"
       on_value:
         then:
           - binary_sensor.template.publish:

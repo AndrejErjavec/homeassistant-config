@@ -194,8 +194,8 @@ script:
 
 sensor:
   - platform: uptime
-    id: esp_8266_uptime
-    name: esp_8266_uptime
+    id: myroom_uptime
+    name: myroom_uptime
     update_interval: 1s
     accuracy_decimals: 1
     unit_of_measurement: s

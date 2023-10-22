@@ -8,4 +8,4 @@
 
 ### Schema
 
-![ESP32 schema](esp32-schema.drawio.svg)
+![ESP32 schema](../images/drawio/esp32-schema.drawio.svg)
