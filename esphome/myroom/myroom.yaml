@@ -22,8 +22,7 @@ esphome:
               - component.update: dht_sensor
               - delay: 250ms
               - component.update: bmp_sensor
-              - delay: 250ms
-              - script.execute: sleep_if_allowed
+              - delay: 100ms
   
   on_shutdown:
     priority: -100
@@ -125,17 +124,14 @@ binary_sensor:
     internal: True 
     # Internal components will not be exposed to the frontend (like Home Assistant). 
     # Only specifying an id without a name will implicitly set this to true.
-  # Inside humidity DHT
   - platform: template
     name: Humidity DHT updated
     id: humidity_dht_received
     internal: True 
-  # Inside temperature BMP
   - platform: template
     name: Temperature BMP updated
     id: temperature_bmp_received
     internal: True
-  # Inside pressure BMP
   - platform: template
     name: Pressure BMP updated
     id: pressure_bmp_received
@@ -153,13 +149,6 @@ binary_sensor:
       id(humidity_dht_received).state &&
       id(temperature_bmp_received).state &&
       id(pressure_bmp_received).state;
-  
-#  - platform: template
-#    name: OTA mode
-#    id: my_room_ota_mode
-#    internal: False
-
-
 
 # Import deep sleep switch from HA
   - platform: homeassistant
@@ -193,14 +182,13 @@ script:
             - logger.log: "Not all sensors updates received yet. Retrying..."
 
 sensor:
-  - platform: uptime
-    id: myroom_uptime
-    name: myroom_uptime
-    update_interval: 1s
-    accuracy_decimals: 1
-    unit_of_measurement: s
-    internal: False
-
+#  - platform: uptime
+#    id: myroom_uptime
+#    name: uptime
+#    update_interval: 1s
+#    accuracy_decimals: 1
+#    unit_of_measurement: s
+#    internal: False
 
 # DHT11 - temperature, humidity
   - platform: dht
@@ -209,7 +197,7 @@ sensor:
     pin: 14
     update_interval: never
     temperature:
-      name: "My room temperature DHT"
+      name: "Temperature DHT"
       id: temperature_dht
       on_value:
         then:
@@ -217,8 +205,9 @@ sensor:
               id: temperature_dht_received
               state: !lambda "return !isnan(id(temperature_dht).state);"
     humidity:
-      name: "My room humidity DHT"
+      name: "Humidity DHT"
       id: humidity_dht
+      force_update: True
       on_value:
         then:
           - binary_sensor.template.publish:
@@ -231,8 +220,9 @@ sensor:
     address: 0x76
     update_interval: never
     temperature:
-      name: "My room temperature BMP"
+      name: "Temperature BMP"
       id: temperature_bmp
+      force_update: True
       oversampling: 16x
       filters:
         - offset: -1.2
@@ -242,8 +232,9 @@ sensor:
               id: temperature_bmp_received
               state: !lambda "return !isnan(id(temperature_bmp).state);"
     pressure:
-      name: "My room pressure BMP"
+      name: "Pressure BMP"
       id: pressure_bmp
+      force_update: True
       on_value:
         then:
           - binary_sensor.template.publish:

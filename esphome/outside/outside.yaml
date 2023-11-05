@@ -1,7 +1,7 @@
 substitutions:
   devicename: outside
   max_run_duration: 60s
-  sleep_duration: 60s
+  sleep_duration: 120s
 
 esp32:
   board: esp32dev
@@ -77,7 +77,7 @@ wifi:
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "esp-outside"
+    ssid: "esp-weather-outside"
     password: "SioVN9kp2gvp"
 
 captive_portal:
@@ -232,7 +232,7 @@ sensor:
       id: outside_termperature_bmp
       oversampling: 16x
       filters:
-        - offset: -1.5
+        - offset: -0.7
       on_value:
         then:
           - binary_sensor.template.publish:
