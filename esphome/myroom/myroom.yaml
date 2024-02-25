@@ -37,16 +37,13 @@ esphome:
 
       # Reset data update sensors states
       - binary_sensor.template.publish:
-          id: temperature_dht_received
+          id: temperature_received
           state: OFF
       - binary_sensor.template.publish:
-          id: humidity_dht_received
+          id: humidity_received
           state: OFF
       - binary_sensor.template.publish:
-          id: temperature_bmp_received
-          state: OFF
-      - binary_sensor.template.publish:
-          id: pressure_bmp_received
+          id: pressure_received
           state: OFF
 
 # Enable logging
@@ -119,22 +116,18 @@ binary_sensor:
 
   # Inside temperature DHT
   - platform: template
-    name: Temperature DHT updated
-    id: temperature_dht_received
+    name: Temperature updated
+    id: temperature_received
     internal: True 
     # Internal components will not be exposed to the frontend (like Home Assistant). 
     # Only specifying an id without a name will implicitly set this to true.
   - platform: template
-    name: Humidity DHT updated
-    id: humidity_dht_received
+    name: Humidity updated
+    id: humidity_received
     internal: True 
   - platform: template
-    name: Temperature BMP updated
-    id: temperature_bmp_received
-    internal: True
-  - platform: template
-    name: Pressure BMP updated
-    id: pressure_bmp_received
+    name: Pressure updated
+    id: pressure_received
     internal: True 
   # All updates
   - platform: template
@@ -145,14 +138,17 @@ binary_sensor:
     # If all sensors data is received. Will be false even if only one sensor fails.
     lambda: |-
       return
-      id(temperature_dht_received).state &&
-      id(humidity_dht_received).state &&
-      id(temperature_bmp_received).state &&
-      id(pressure_bmp_received).state;
+      id(humidity_received).state &&
+      id(temperature_received).state &&
+      id(pressure_received).state;
+    on_press:
+      then:
+        - delay: 100ms
+        - script.execute: sleep_if_allowed
 
 # Import deep sleep switch from HA
   - platform: homeassistant
-    name: "myroom OTA mode"
+    name: "Myroom OTA mode"
     internal: false
     id: myroom_ota_mode
     entity_id: input_boolean.myroom_ota_mode
@@ -182,13 +178,13 @@ script:
             - logger.log: "Not all sensors updates received yet. Retrying..."
 
 sensor:
-#  - platform: uptime
-#    id: myroom_uptime
-#    name: uptime
-#    update_interval: 1s
-#    accuracy_decimals: 1
-#    unit_of_measurement: s
-#    internal: False
+  - platform: uptime
+    id: myroom_uptime
+    name: Myroom uptime
+    update_interval: 1s
+    accuracy_decimals: 1
+    unit_of_measurement: s
+    internal: False
 
 # DHT11 - temperature, humidity
   - platform: dht
@@ -196,23 +192,15 @@ sensor:
     id: dht_sensor
     pin: 14
     update_interval: never
-    temperature:
-      name: "Temperature DHT"
-      id: temperature_dht
-      on_value:
-        then:
-          - binary_sensor.template.publish:
-              id: temperature_dht_received
-              state: !lambda "return !isnan(id(temperature_dht).state);"
     humidity:
-      name: "Humidity DHT"
-      id: humidity_dht
+      name: "Myroom Humidity"
+      id: myroom_humidity
       force_update: True
       on_value:
         then:
           - binary_sensor.template.publish:
-              id: humidity_dht_received
-              state: !lambda "return !isnan(id(humidity_dht).state);"
+              id: humidity_received
+              state: !lambda "return !isnan(id(myroom_humidity).state);"
 
   # BMP280 - temperature, pressure
   - platform: bmp280
@@ -220,8 +208,8 @@ sensor:
     address: 0x76
     update_interval: never
     temperature:
-      name: "Temperature BMP"
-      id: temperature_bmp
+      name: "Myroom Temperature"
+      id: myroom_temperature
       force_update: True
       oversampling: 16x
       filters:
@@ -229,14 +217,14 @@ sensor:
       on_value:
         then:
           - binary_sensor.template.publish:
-              id: temperature_bmp_received
-              state: !lambda "return !isnan(id(temperature_bmp).state);"
+              id: temperature_received
+              state: !lambda "return !isnan(id(myroom_temperature).state);"
     pressure:
-      name: "Pressure BMP"
-      id: pressure_bmp
+      name: "Myroom Pressure"
+      id: myroom_pressure
       force_update: True
       on_value:
         then:
           - binary_sensor.template.publish:
-              id: pressure_bmp_received
-              state: !lambda "return !isnan(id(pressure_bmp).state);"
+              id: pressure_received
+              state: !lambda "return !isnan(id(myroom_pressure).state);"
